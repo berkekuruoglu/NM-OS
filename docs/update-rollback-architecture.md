@@ -27,6 +27,7 @@ Release metadata must provide:
 - installer artifact identity
 - checksum/signature mode
 - build/channel/version metadata
+- a positive, monotonically increasing `release_sequence`
 - rollback capability signal
 
 Minimum required files:
@@ -39,6 +40,9 @@ Verification rules:
 - metadata format and required keys must pass CI checks
 - checksum/signature mode must be present and readable
 - trust-chain status must be user-visible from Control Center
+- a signed version older than the installed version is rejected
+- metadata below the highest accepted `release_sequence` is rejected as a replay
+- slot archives reject links, device nodes, and paths outside the inactive slot
 
 ## Rollback UX And State
 

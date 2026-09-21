@@ -2,7 +2,7 @@
 
 ## Who Uses NM-OS
 
-NM-OS is designed for everyone  -  not a specific type of user.
+NM-OS is designed first for privacy-conscious people who do not want to become Linux or security experts.
 
 The system does not categorize people. A student, a journalist, a retiree, and a system
 administrator all use the same platform. What changes is the depth they go to and the
@@ -18,7 +18,7 @@ and the operating system should move with them  -  not force them into one postu
 | Moment | Mode | How |
 |---|---|---|
 | Regular morning work | Balanced (default) | No action needed  -  this is the starting state |
-| Public Wi-Fi at a cafe | Tor-first enabled | One toggle in Control Center -> Network |
+| Public Wi-Fi at a cafe | Hardened with Tor routing | Control Center -> Security -> Hardened |
 | Exam prep  -  no distractions | Focus mode | Notifications off, distraction sites off |
 | Reviewing sensitive documents | Maximum | Control Center -> Security -> Maximum -> one click |
 | Done with sensitive work | Back to Balanced | Control Center -> Security -> Balanced -> one click |
@@ -121,4 +121,3 @@ one mode switch. The system feels personal and stable.
 3. **No jargon without explanation**  -  "Tor-first" links to a one-line plain-language description
 4. **No forced steps**  -  every setup step can be skipped and revisited later
 5. **No hidden controls**  -  every feature is reachable from the Control Center
-

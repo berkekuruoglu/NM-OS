@@ -12,6 +12,8 @@ STATE_FILE_MODE = 0o660
 def normalize_onboarding_page_index(value: object, page_count: int) -> int:
     if page_count <= 0:
         return 0
+    if not isinstance(value, (bool, int, float, str, bytes, bytearray)):
+        value = 0
     try:
         parsed = int(value)
     except (TypeError, ValueError):

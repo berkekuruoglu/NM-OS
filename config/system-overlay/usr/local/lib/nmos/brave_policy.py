@@ -44,7 +44,7 @@ def main() -> int:
     settings = load_effective_system_settings()
     if not bool(settings.get("allow_brave_browser", False)):
         return deny("Brave is disabled in system settings.")
-    if str(settings.get("network_policy", "tor")) == "offline":
+    if str(settings.get("network_policy", "direct")) == "offline":
         return deny("Brave is unavailable while networking is disabled.")
 
     if not target.exists():

@@ -102,7 +102,7 @@ def test_system_settings_round_trip(workspace_tmp_path: Path) -> None:
     assert saved["network_policy"] == "direct"
     assert saved["allow_brave_browser"] is True
     assert saved["sandbox_default"] == "strict"
-    assert "network_policy" in saved["pending_reboot"]
+    assert "network_policy" not in saved["pending_reboot"]
     assert "sandbox_default" in saved["pending_reboot"]
 
     loaded = load_system_settings(persistent_path=persistent, runtime_path=runtime, applied_path=applied)
@@ -124,7 +124,7 @@ def test_system_settings_round_trip(workspace_tmp_path: Path) -> None:
         "sandbox_default"
     ] == "strict"
 
-    assert normalize_system_settings({"network_policy": "invalid"})["network_policy"] == "tor"
+    assert normalize_system_settings({"network_policy": "invalid"})["network_policy"] == "direct"
     assert load_system_settings(
         persistent_path=workspace_tmp_path / "missing.json",
         runtime_path=workspace_tmp_path / "also-missing.json",
@@ -473,7 +473,7 @@ def test_posture_preview_is_explainable() -> None:
     )
 
     assert posture["profile"] == "balanced"
-    assert posture["ideal_for"] == "Best for most people who want a clear privacy baseline without a harsh learning curve."
+    assert posture["ideal_for"] == "Best for privacy-conscious people who want a practical daily Linux desktop."
     assert posture["effective"]["network_policy"] == "direct"
     assert posture["effective"]["vault"]["auto_lock_minutes"] == 5
     assert posture["effective"]["allow_brave_browser"] is True

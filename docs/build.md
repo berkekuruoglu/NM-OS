@@ -28,6 +28,8 @@ Artifacts in `dist/`:
 - `release-manifest.json.sig` (when signing key is configured)
 
 The release manifest now carries slot-image and recovery-image metadata, a slot-based rollback scope, and signing mode details.
+It also carries a positive `release_sequence`; production release automation should set `NMOS_RELEASE_SEQUENCE`
+to a value that only increases so clients can reject replayed signed metadata.
 When `NMOS_UPDATE_SIGNING_KEY_ID` is configured and `gpg` is available, the build emits a detached `release-manifest.json.sig` and records `detached-gpg` mode in `release-manifest.json`.
 
 ## How the installer ISO is built

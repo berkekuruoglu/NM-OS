@@ -1,0 +1,9 @@
+{
+  "BlockThirdPartyCookies": true,
+  "BrowserSignin": 0,
+  "EnableDoNotTrack": true,
+  "MetricsReportingEnabled": false,
+  "PrivacySandboxAdMeasurementEnabled": false,
+  "PrivacySandboxPromptEnabled": false,
+  "PrivacySandboxSiteEnabledAdsEnabled": false
+}

@@ -10,7 +10,7 @@ def resolve_unix_uid(username: str | None) -> int | None:
     except ImportError:
         return None
     try:
-        return int(pwd.getpwnam(name).pw_uid)
+        return int(pwd.getpwnam(name).pw_uid)  # type: ignore[attr-defined]
     except KeyError:
         return None
 
@@ -25,21 +25,21 @@ def resolve_group_member_uids(group_name: str | None) -> set[int]:
     except ImportError:
         return set()
     try:
-        target_group = grp.getgrnam(name)
+        target_group = grp.getgrnam(name)  # type: ignore[attr-defined]
     except KeyError:
         return set()
 
     members = set(target_group.gr_mem)
     users_with_primary_group = {
         entry.pw_name
-        for entry in pwd.getpwall()
+        for entry in pwd.getpwall()  # type: ignore[attr-defined]
         if int(entry.pw_gid) == int(target_group.gr_gid)
     }
     usernames = members.union(users_with_primary_group)
     uids: set[int] = set()
     for username in usernames:
         try:
-            uids.add(int(pwd.getpwnam(username).pw_uid))
+            uids.add(int(pwd.getpwnam(username).pw_uid))  # type: ignore[attr-defined]
         except KeyError:
             continue
     return uids

@@ -53,6 +53,17 @@ RECOVERY_ARCHIVE_NAME="${RECOVERY_STEM}.tar.gz"
 RECOVERY_ARCHIVE_PATH="${DIST_DIR}/${RECOVERY_ARCHIVE_NAME}"
 BUILD_TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 BUILD_ID="$(date -u +"%Y%m%dT%H%M%SZ")-${VERSION}"
+RELEASE_SEQUENCE="${NMOS_RELEASE_SEQUENCE:-$(date -u +"%Y%m%d%H%M%S")}"
+case "${RELEASE_SEQUENCE}" in
+    ""|*[!0-9]*)
+        echo "NMOS_RELEASE_SEQUENCE must be a positive integer." >&2
+        exit 1
+        ;;
+esac
+if [ "${RELEASE_SEQUENCE}" -le 0 ]; then
+    echo "NMOS_RELEASE_SEQUENCE must be greater than zero." >&2
+    exit 1
+fi
 RELEASE_CHANNEL="$(release_channel_for_version "${VERSION}")"
 MINIMUM_SOURCE_VERSION="${NMOS_MINIMUM_SOURCE_VERSION:-}"
 if [ -z "${MINIMUM_SOURCE_VERSION}" ]; then
@@ -114,7 +125,7 @@ build_host=$(hostname)
 built_at=${BUILD_TIMESTAMP}
 build_id=${BUILD_ID}
 channel=${RELEASE_CHANNEL}
-source_repo=https://github.com/Krypera/NM-OS.git
+source_repo=https://github.com/berkekuruoglu/NM-OS.git
 artifact_type=system-overlay
 installer_assets=${INSTALLER_ARCHIVE_NAME}
 installer_iso=${INSTALLER_ISO_NAME}
@@ -130,10 +141,11 @@ cat > "${DIST_DIR}/release-manifest.json" <<EOF
   "schema_version": 1,
   "product": "NM-OS",
   "version": "${VERSION}",
+  "release_sequence": ${RELEASE_SEQUENCE},
   "channel": "${RELEASE_CHANNEL}",
   "build_id": "${BUILD_ID}",
   "released_at": "${BUILD_TIMESTAMP}",
-  "source_repo": "https://github.com/Krypera/NM-OS.git",
+  "source_repo": "https://github.com/berkekuruoglu/NM-OS.git",
   "artifacts": {
     "slot_image": {
       "name": "${ARCHIVE_NAME}",

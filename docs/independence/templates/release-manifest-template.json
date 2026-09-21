@@ -2,29 +2,40 @@
   "schema_version": 1,
   "product": "NM-OS",
   "version": "0.1.0-alpha.1",
+  "release_sequence": 202604200001,
   "channel": "beta",
   "released_at": "2026-01-01T00:00:00Z",
-  "artifacts": [
-    {
-      "name": "nmos-installer-0.1.0-alpha.1-amd64.iso",
+  "artifacts": {
+    "slot_image": {
+      "name": "nmos-system-overlay-0.1.0-alpha.1.tar.gz",
       "sha256": "<sha256>",
-      "signature": "<sig-path>"
+      "url": "https://updates.example/nmos-system-overlay-0.1.0-alpha.1.tar.gz"
+    },
+    "recovery_image": {
+      "name": "nmos-recovery-image-0.1.0-alpha.1.tar.gz",
+      "sha256": "<sha256>",
+      "url": "https://updates.example/nmos-recovery-image-0.1.0-alpha.1.tar.gz"
+    },
+    "installer_iso": {
+      "name": "nmos-installer-0.1.0-alpha.1-amd64.iso",
+      "sha256": "<sha256>"
     }
-  ],
+  },
   "package_set_lock": {
     "name": "nmos-desktop-base",
-    "digest": "<digest>"
+    "sha256": "<sha256>"
   },
   "upgrade_policy": {
     "minimum_source_version": "0.1.0-alpha.0",
-    "supports_rollback": true
+    "supports_rollback": true,
+    "rollback_scope": "slot-based"
   },
-  "recovery": {
-    "image": "nmos-recovery-0.1.0-alpha.1-amd64.iso",
-    "sha256": "<sha256>"
+  "migration": {
+    "bundle_id": "20260420T000000Z-0.1.0-alpha.1"
   },
   "signing": {
+    "mode": "detached-gpg",
+    "signature_verified": true,
     "key_id": "<key-id>"
   }
 }
-

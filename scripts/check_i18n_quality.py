@@ -6,12 +6,10 @@ import re
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "apps" / "nmos_common"))
 
 from nmos_common.i18n import DEFAULT_UI_LOCALE, LANGUAGE_OPTIONS, TRANSLATIONS  # noqa: E402
-
 
 PLACEHOLDER_PATTERN = re.compile(r"{([a-zA-Z0-9_]+)}")
 BAD_MARKERS = (

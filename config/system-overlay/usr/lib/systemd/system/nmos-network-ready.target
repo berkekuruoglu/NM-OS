@@ -1,4 +1,3 @@
 [Unit]
 Description=NM-OS network ready
-Documentation=https://github.com/Krypera/NM-OS
-
+Documentation=https://github.com/berkekuruoglu/NM-OS

@@ -111,7 +111,7 @@ The encrypted vault is a concrete example of explainable security:
 | Profile | Goal | Network | Isolation | Devices | Logging | Tradeoff |
 | --- | --- | --- | --- | --- | --- | --- |
 | Relaxed | Lowest friction | Direct | Standard | Shared | Balanced | Easiest to use, weakest default boundaries |
-| Balanced | Default daily-use baseline | Tor-first | Focused | Prompt | Minimal | Safer defaults with moderate friction |
+| Balanced | Default privacy-conscious daily baseline | Direct | Focused | Prompt | Minimal | Strong browser privacy and broad compatibility without hiding the public IP |
 | Hardened | Stronger daily containment | Tor-first | Strict | Locked | Minimal | Less convenience and narrower compatibility |
 | Maximum | Highest practical restriction | Offline | Strict | Locked | Sealed | Strongest posture, intentionally restrictive |
 
@@ -119,7 +119,8 @@ The encrypted vault is a concrete example of explainable security:
 
 | Setting | User-facing meaning | Enforcement layer today | Status |
 | --- | --- | --- | --- |
-| `network_policy` | Direct / Tor-first / Offline network posture | `config/system-overlay/usr/local/lib/nmos/network_bootstrap.py` + nftables bootstrap rules + Tor bootstrap state | Enforced |
+| `network_policy` | Direct / Tor-routed / Offline network posture | `network_bootstrap.py` nftables TCP/DNS redirects + Tor `TransPort`/`DNSPort` + fail-closed output policy | Enforced |
+| Browser tracking protection | Strong daily anti-tracking baseline | Firefox enterprise preferences + Chromium managed privacy policy in the system overlay | Enforced baseline |
 | `sandbox_default` | Standard / Focused / Strict default app isolation intent | `config/system-overlay/usr/local/lib/nmos/app_isolation_policy.py` + `nmos-app-isolation-policy.service` global Flatpak override baseline | Enforced baseline (global defaults), per-app overrides roadmap |
 | `app_overrides` | Per-application filesystem, network, and device isolation overrides | `app_isolation_policy.py` per-app `flatpak override --system <app-id>` rules + Control Center per-app editor + settings D-Bus `SetOverrides` | Enforced (per-app permission profile layer) |
 | `device_policy` | Shared / Prompt / Locked external device trust posture | `config/system-overlay/usr/local/lib/nmos/device_policy.py` + `nmos-device-policy.service` udev baseline for removable USB storage trust | Enforced baseline (removable storage posture), HID/USB networking roadmap |

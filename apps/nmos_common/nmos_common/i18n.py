@@ -78,13 +78,13 @@ TRANSLATIONS = {
         "Hardened": "Reforzado",
         "Maximum": "Máximo",
         "More convenience, fewer guards, direct networking by default.": "Más comodidad, menos barreras y red directa por defecto.",
-        "Recommended defaults with Tor-first networking and moderate friction.": "Configuración recomendada con red priorizando Tor y fricción moderada.",
-        "Stricter defaults for daily use with less convenience and tighter policy.": "Valores más estrictos para el uso diario, con menos comodidad y una política más rígida.",
+        "Recommended privacy defaults with direct networking and strong tracking protection.": "Valores de privacidad recomendados con red directa y fuerte protección contra rastreo.",
+        "A private Tor-routed workspace with stricter isolation and device policy.": "Un espacio privado enrutado por Tor con aislamiento y política de dispositivos más estrictos.",
         "Highest practical protection with strong restrictions and offline defaults.": "La protección práctica más alta con restricciones fuertes y modo sin conexión por defecto.",
         "Best for people who want the easiest daily desktop experience.": "Ideal para quienes quieren la experiencia diaria de escritorio más sencilla.",
         "You gain convenience and compatibility, but the default trust boundaries are lighter.": "Ganas comodidad y compatibilidad, pero los límites de confianza por defecto son más ligeros.",
-        "Best for most people who want a clear privacy baseline without a harsh learning curve.": "Ideal para la mayoría de las personas que quieren una base de privacidad clara sin una curva dura de aprendizaje.",
-        "It keeps a safer default posture, but some tasks can feel slower or more deliberate.": "Mantiene una postura por defecto más segura, pero algunas tareas pueden sentirse más lentas o deliberadas.",
+        "Best for privacy-conscious people who want a practical daily Linux desktop.": "Ideal para personas conscientes de la privacidad que quieren un escritorio Linux práctico para el día a día.",
+        "It keeps broad website compatibility while tightening app, device, logging, and browser privacy defaults.": "Mantiene una amplia compatibilidad web mientras refuerza la privacidad de aplicaciones, dispositivos, registros y navegador.",
         "Best for people who want stronger daily protection and are comfortable with extra friction.": "Ideal para quienes quieren una protección diaria más fuerte y aceptan una fricción adicional.",
         "You get tighter defaults, but compatibility and convenience start to narrow.": "Obtienes valores más estrictos, pero la compatibilidad y la comodidad empiezan a reducirse.",
         "Best for high-sensitivity situations where minimizing exposure matters more than convenience.": "Ideal para situaciones de alta sensibilidad donde minimizar la exposición importa más que la comodidad.",
@@ -310,7 +310,7 @@ def display_setting_value(locale: str | None, key: str, value: object) -> str:
         text = str(value or "").strip().lower()
         return text or "us"
     if key == "network_policy":
-        return display_network_policy_name(str(value or "tor"), locale=locale)
+        return display_network_policy_name(str(value or "direct"), locale=locale)
     if key == "allow_brave_browser":
         return translate(locale, "Enabled" if bool(value) else "Disabled")
     if key == "sandbox_default":
@@ -471,7 +471,7 @@ def explain_logging_policy(locale: str | None, value: str | None) -> str:
 
 
 def explain_brave_visibility(locale: str | None, allow_brave_browser: bool, network_policy: str | None) -> str:
-    normalized_policy = str(network_policy or "tor").strip().lower()
+    normalized_policy = str(network_policy or "direct").strip().lower()
     if allow_brave_browser and normalized_policy != "offline":
         return translate(locale, "Brave can appear when it is installed and the selected network policy allows it.")
     return translate(locale, "Brave stays hidden unless you explicitly allow it.")
@@ -482,7 +482,7 @@ def posture_explanation_lines(locale: str | None, posture: object) -> list[str]:
     effective = raw.get("effective", {}) if isinstance(raw.get("effective", {}), dict) else {}
     lines = []
 
-    network_policy = str(effective.get("network_policy", "tor")).strip().lower()
+    network_policy = str(effective.get("network_policy", "direct")).strip().lower()
     lines.append(explain_network_policy(locale, network_policy))
 
     sandbox_default = str(effective.get("sandbox_default", "focused")).strip().lower()

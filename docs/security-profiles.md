@@ -20,18 +20,20 @@ You gain convenience and compatibility, but the default trust boundaries are lig
 ## `Balanced`
 
 - default NM-OS profile
-- Tor-first networking by default
-- moderate friction
-- recommended starting point for most users
+- direct networking for broad website compatibility
+- strong Firefox and Chromium tracking-protection defaults
+- focused app isolation, prompt-gated removable storage, and minimal logging
+- recommended starting point for privacy-conscious daily users
 
 Who it is for:
-Most people who want a clear privacy baseline without a harsh learning curve.
+People who want a practical privacy baseline without a harsh learning curve.
 
 Tradeoff:
-It keeps a safer default posture, but some tasks can feel slower or more deliberate.
+It does not hide the public IP address from websites; Hardened mode is available when Tor routing is needed.
 
 ## `Hardened`
 
+- enforced Tor routing for TCP and DNS traffic
 - tighter sandbox and device defaults
 - reduced motion and denser UI defaults
 - stronger posture for daily use with less convenience

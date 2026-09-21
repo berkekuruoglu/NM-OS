@@ -92,7 +92,7 @@ def apply_brave_visibility(settings: dict) -> None:
         return
     brave_enabled = load_feature_flag(BRAVE_FEATURE_FILE)
     allow_brave = bool(settings.get("allow_brave_browser", False))
-    offline = str(settings.get("network_policy", "tor")) == "offline"
+    offline = str(settings.get("network_policy", "direct")) == "offline"
     if brave_enabled and allow_brave and not offline:
         remove_override()
         return

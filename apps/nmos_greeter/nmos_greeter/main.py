@@ -256,7 +256,7 @@ class GreeterWindow(Adw.ApplicationWindow):
                 {
                     "locale": state.get("locale", DEFAULT_UI_LOCALE),
                     "keyboard": state.get("keyboard", "us"),
-                    "network_policy": state.get("network_policy", "tor"),
+                    "network_policy": state.get("network_policy", "direct"),
                     "allow_brave_browser": bool(state.get("allow_brave_browser", False)),
                     "browser": state.get("browser", "firefox-esr"),
                     "default_browser": state.get("default_browser", "firefox-esr"),
@@ -274,7 +274,7 @@ class GreeterWindow(Adw.ApplicationWindow):
                 {
                     "locale": self.system_settings.get("locale", DEFAULT_UI_LOCALE),
                     "keyboard": self.system_settings.get("keyboard", "us"),
-                    "network_policy": self.system_settings.get("network_policy", "tor"),
+                    "network_policy": self.system_settings.get("network_policy", "direct"),
                     "allow_brave_browser": bool(self.system_settings.get("allow_brave_browser", False)),
                     "default_browser": self.system_settings.get("default_browser", "firefox-esr"),
                     "onboarding_page_index": 0,

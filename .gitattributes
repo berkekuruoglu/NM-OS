@@ -23,5 +23,6 @@
 
 config/system-overlay/usr/local/bin/* text eol=lf
 config/system-overlay/etc/gdm3/PostLogin/* text eol=lf
+config/system-overlay/etc/os-release text eol=lf
 
 *.ps1 text eol=crlf

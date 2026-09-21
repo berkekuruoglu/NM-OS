@@ -233,6 +233,10 @@ grep -q "\"version\": \"${VERSION}\"" "${RELEASE_MANIFEST_JSON_PATH}" || {
     echo "release manifest does not record the current version." >&2
     exit 1
 }
+grep -Eq '"release_sequence": [1-9][0-9]*' "${RELEASE_MANIFEST_JSON_PATH}" || {
+    echo "release manifest does not record a positive monotonic release sequence." >&2
+    exit 1
+}
 grep -q "\"channel\": \"${RELEASE_CHANNEL}\"" "${RELEASE_MANIFEST_JSON_PATH}" || {
     echo "release manifest does not record the derived release channel." >&2
     exit 1

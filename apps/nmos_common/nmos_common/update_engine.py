@@ -11,6 +11,7 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from nmos_common.config_helpers import read_assignment_file
 from nmos_common.platform_adapter import get_runtime_dir, get_state_dir
@@ -70,6 +71,8 @@ class SlotState:
     boot_attempts_remaining: int = 0
     installed_version: str = "unknown"
     staged_version: str = ""
+    accepted_release_sequence: int = 0
+    staged_release_sequence: int = 0
     last_boot_result: str = "unknown"
 
     def to_dict(self) -> dict[str, object]:
@@ -81,6 +84,8 @@ class SlotState:
             "boot_attempts_remaining": int(self.boot_attempts_remaining),
             "installed_version": self.installed_version,
             "staged_version": self.staged_version,
+            "accepted_release_sequence": int(self.accepted_release_sequence),
+            "staged_release_sequence": int(self.staged_release_sequence),
             "last_boot_result": self.last_boot_result,
         }
 
@@ -100,6 +105,8 @@ def _normalize_channel(value: object) -> str:
 
 
 def _safe_int(value: object, default: int = 0) -> int:
+    if not isinstance(value, (bool, int, float, str, bytes, bytearray)):
+        return default
     try:
         return int(value)
     except (TypeError, ValueError):
@@ -113,6 +120,7 @@ def _default_status() -> dict[str, object]:
         "channel": _normalize_channel(_infer_channel(installed)),
         "installed_version": installed,
         "available_version": "",
+        "available_release_sequence": 0,
         "staged_version": "",
         "active_slot": "a",
         "inactive_slot": "b",
@@ -191,6 +199,11 @@ def _load_slot_state() -> SlotState:
         boot_attempts_remaining=max(0, _safe_int(data.get("boot_attempts_remaining"), 0)),
         installed_version=str(data.get("installed_version", _infer_installed_version())).strip() or "unknown",
         staged_version=str(data.get("staged_version", "")).strip(),
+        accepted_release_sequence=max(
+            0,
+            _safe_int(data.get("accepted_release_sequence"), _infer_installed_release_sequence()),
+        ),
+        staged_release_sequence=max(0, _safe_int(data.get("staged_release_sequence"), 0)),
         last_boot_result=str(data.get("last_boot_result", "unknown")).strip() or "unknown",
     )
 
@@ -258,17 +271,40 @@ def _slot_device(slot_name: str) -> Path:
 
 
 def _safe_extract_tarball(archive_path: Path, destination: Path) -> None:
+    resolved_destination = destination.resolve()
+    directory_modes: list[tuple[Path, int]] = []
     with tarfile.open(archive_path, mode="r:*") as archive:
         for member in archive.getmembers():
+            if member.issym() or member.islnk():
+                raise UpdateEngineError(
+                    "artifact_extract_failed",
+                    f"refusing to extract archive link: {member.name}",
+                )
+            if not member.isdir() and not member.isreg():
+                raise UpdateEngineError(
+                    "artifact_extract_failed",
+                    f"refusing to extract special archive member: {member.name}",
+                )
             target = destination / member.name
             try:
                 resolved_target = target.resolve()
-                resolved_destination = destination.resolve()
             except OSError as exc:
                 raise UpdateEngineError("artifact_extract_failed", f"unable to resolve staged path: {exc}") from exc
             if resolved_destination not in resolved_target.parents and resolved_target != resolved_destination:
                 raise UpdateEngineError("artifact_extract_failed", f"refusing to extract path outside slot root: {member.name}")
-        archive.extractall(destination)
+            if member.isdir():
+                resolved_target.mkdir(parents=True, exist_ok=True)
+                directory_modes.append((resolved_target, member.mode & 0o777))
+                continue
+            resolved_target.parent.mkdir(parents=True, exist_ok=True)
+            source = archive.extractfile(member)
+            if source is None:
+                raise UpdateEngineError("artifact_extract_failed", f"unable to read archive member: {member.name}")
+            with source, resolved_target.open("wb") as handle:
+                shutil.copyfileobj(source, handle)
+            os.chmod(resolved_target, member.mode & 0o777)
+    for path, mode in sorted(directory_modes, key=lambda item: len(item[0].parts), reverse=True):
+        os.chmod(path, mode)
 
 
 def _run_command(command: list[str], *, timeout: int = 30) -> tuple[bool, str]:
@@ -355,6 +391,21 @@ def _infer_installed_version() -> str:
     return "unknown"
 
 
+def _infer_installed_release_sequence() -> int:
+    for path in (SHARED_RELEASE_MANIFEST_FILE, DEFAULT_DIST_MANIFEST_FILE):
+        if not path.exists():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, json.JSONDecodeError):
+            continue
+        if isinstance(payload, dict):
+            sequence = _safe_int(payload.get("release_sequence"), 0)
+            if sequence > 0:
+                return sequence
+    return 0
+
+
 def _infer_channel(version: str) -> str:
     lowered = str(version).lower()
     if "alpha" in lowered or "nightly" in lowered:
@@ -384,13 +435,31 @@ def _version_less_than(lhs: str, rhs: str) -> bool:
     right_num, right_suffix = _parse_version(rhs)
     if left_num != right_num:
         return left_num < right_num
-    if left_suffix == right_suffix:
-        return False
-    if not left_suffix and right_suffix:
-        return False
-    if left_suffix and not right_suffix:
-        return True
-    return left_suffix < right_suffix
+    return _compare_prerelease(left_suffix, right_suffix) < 0
+
+
+def _compare_prerelease(lhs: str, rhs: str) -> int:
+    if lhs == rhs:
+        return 0
+    if not lhs:
+        return 1
+    if not rhs:
+        return -1
+    left_parts = lhs.split(".")
+    right_parts = rhs.split(".")
+    for left, right in zip(left_parts, right_parts, strict=False):
+        if left == right:
+            continue
+        left_numeric = left.isdigit()
+        right_numeric = right.isdigit()
+        if left_numeric and right_numeric:
+            return -1 if int(left) < int(right) else 1
+        if left_numeric != right_numeric:
+            return -1 if left_numeric else 1
+        return -1 if left < right else 1
+    if len(left_parts) == len(right_parts):
+        return 0
+    return -1 if len(left_parts) < len(right_parts) else 1
 
 
 def _read_catalog_payload() -> dict[str, object]:
@@ -562,11 +631,14 @@ def _load_manifest(path: Path) -> dict[str, object]:
     return payload
 
 
-def _require_manifest_fields(manifest: dict[str, object]) -> dict[str, object]:
+def _require_manifest_fields(manifest: dict[str, object]) -> dict[str, Any]:
     errors: list[str] = []
     version = str(manifest.get("version", "")).strip()
     if not version:
         errors.append("missing version")
+    release_sequence = _safe_int(manifest.get("release_sequence"), 0)
+    if release_sequence <= 0:
+        errors.append("missing or invalid release_sequence")
     artifacts = manifest.get("artifacts", {})
     if not isinstance(artifacts, dict):
         errors.append("missing artifacts object")
@@ -606,6 +678,7 @@ def _require_manifest_fields(manifest: dict[str, object]) -> dict[str, object]:
         raise UpdateEngineError("manifest_required_fields_missing", "; ".join(errors))
     return {
         "version": version,
+        "release_sequence": release_sequence,
         "slot_image": slot_image,
         "recovery_image": recovery_image,
         "upgrade_policy": upgrade_policy,
@@ -620,6 +693,25 @@ def _apply_version_policy(installed_version: str, minimum_source_version: str) -
         raise UpdateEngineError(
             "version_policy_blocked",
             f"installed version {installed_version} is below required source {minimum_source_version}",
+        )
+
+
+def _enforce_anti_rollback(
+    *,
+    installed_version: str,
+    available_version: str,
+    accepted_release_sequence: int,
+    available_release_sequence: int,
+) -> None:
+    if installed_version and installed_version != "unknown" and _version_less_than(available_version, installed_version):
+        raise UpdateEngineError(
+            "release_downgrade_blocked",
+            f"refusing signed downgrade from {installed_version} to {available_version}",
+        )
+    if accepted_release_sequence > 0 and available_release_sequence < accepted_release_sequence:
+        raise UpdateEngineError(
+            "release_replay_blocked",
+            "refusing release metadata older than the highest accepted release sequence",
         )
 
 
@@ -776,6 +868,14 @@ def check_for_updates(channel: str) -> dict[str, object]:
         installed_version = slot.installed_version or _infer_installed_version()
         minimum_source_version = str(details["upgrade_policy"].get("minimum_source_version", "")).strip()
         _apply_version_policy(installed_version, minimum_source_version)
+        available_version = str(details["version"])
+        available_release_sequence = _safe_int(details["release_sequence"], 0)
+        _enforce_anti_rollback(
+            installed_version=installed_version,
+            available_version=available_version,
+            accepted_release_sequence=slot.accepted_release_sequence,
+            available_release_sequence=available_release_sequence,
+        )
     except UpdateEngineError as exc:
         status = _set_failed_status(status, exc.reason, str(exc))
         _append_history("check_failed", {"channel": normalized_channel, "reason": exc.reason, "error": str(exc)})
@@ -787,9 +887,9 @@ def check_for_updates(channel: str) -> dict[str, object]:
             shutil.copyfile(signature_source, PERSISTENT_MANIFEST_SIG_FILE)
     except (OSError, shutil.Error):
         pass
-    available_version = str(details["version"])
     status["manifest_signature_verified"] = True
     status["available_version"] = available_version
+    status["available_release_sequence"] = available_release_sequence
     status["installed_version"] = installed_version
     status["guardrail_update"] = "Update metadata verified with detached signatures."
     status["guardrail_rollback"] = "Rollback is supported by current release policy."
@@ -838,6 +938,7 @@ def stage_update(channel: str) -> dict[str, object]:
     slot.pending_slot = slot.inactive_slot
     slot.boot_attempts_remaining = 1
     slot.staged_version = available_version
+    slot.staged_release_sequence = _safe_int(details["release_sequence"], 0)
     slot.last_boot_result = "pending"
     _save_slot_state(slot)
     _persist_boot_intent(slot)
@@ -897,6 +998,7 @@ def rollback_to_previous_slot(reason: str = "manual") -> dict[str, object]:
     slot.boot_attempts_remaining = 0
     slot.last_boot_result = "rolled_back"
     slot.staged_version = ""
+    slot.staged_release_sequence = 0
     _save_slot_state(slot)
     _clear_boot_intent()
     _save_persistent_health(
@@ -935,7 +1037,10 @@ def acknowledge_healthy_boot() -> dict[str, object]:
     slot.previous_slot = ""
     slot.boot_attempts_remaining = 0
     slot.installed_version = slot.staged_version or slot.installed_version
+    if slot.staged_release_sequence > 0:
+        slot.accepted_release_sequence = slot.staged_release_sequence
     slot.staged_version = ""
+    slot.staged_release_sequence = 0
     slot.last_boot_result = "healthy"
     _save_slot_state(slot)
     _clear_boot_intent()

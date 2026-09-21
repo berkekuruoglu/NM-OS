@@ -51,12 +51,23 @@ for symbol in \
     'process_boot_health' \
     'run_health_monitor' \
     '_verify_detached_signature' \
+    '_enforce_anti_rollback' \
     '_require_manifest_fields'; do
     grep -q "${symbol}" "${UPDATE_ENGINE}" || {
         echo "update engine is missing function: ${symbol}" >&2
         exit 1
     }
 done
+
+if grep -q 'archive.extractall' "${UPDATE_ENGINE}"; then
+    echo "update engine still uses unsafe bulk tar extraction." >&2
+    exit 1
+fi
+
+grep -q 'release_sequence' "${UPDATE_ENGINE}" || {
+    echo "update engine does not enforce monotonic signed release metadata." >&2
+    exit 1
+}
 
 for symbol in \
     'self.update_client.check_for_updates' \

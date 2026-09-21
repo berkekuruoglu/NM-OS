@@ -12,7 +12,7 @@ SCHEMA_VERSION = 1
 
 DEFAULT_UI_LOCALE = "en_US.UTF-8"
 DEFAULT_KEYBOARD = "us"
-DEFAULT_NETWORK_POLICY = "tor"
+DEFAULT_NETWORK_POLICY = "direct"
 DEFAULT_SECURITY_PROFILE = "balanced"
 
 SUPPORTED_NETWORK_POLICIES = {"tor", "direct", "offline"}
@@ -43,13 +43,13 @@ PROFILE_METADATA = {
     },
     "balanced": {
         "label": "Balanced",
-        "summary": "Recommended defaults with Tor-first networking and moderate friction.",
-        "ideal_for": "Best for most people who want a clear privacy baseline without a harsh learning curve.",
-        "tradeoff": "It keeps a safer default posture, but some tasks can feel slower or more deliberate.",
+        "summary": "Recommended privacy defaults with direct networking and strong tracking protection.",
+        "ideal_for": "Best for privacy-conscious people who want a practical daily Linux desktop.",
+        "tradeoff": "It keeps broad website compatibility while tightening app, device, logging, and browser privacy defaults.",
     },
     "hardened": {
         "label": "Hardened",
-        "summary": "Stricter defaults for daily use with less convenience and tighter policy.",
+        "summary": "A private Tor-routed workspace with stricter isolation and device policy.",
         "ideal_for": "Best for people who want stronger daily protection and are comfortable with extra friction.",
         "tradeoff": "You get tighter defaults, but compatibility and convenience start to narrow.",
     },
@@ -148,7 +148,7 @@ PROFILE_DEFAULTS = {
     "hardened": {
         "locale": DEFAULT_UI_LOCALE,
         "keyboard": DEFAULT_KEYBOARD,
-        "network_policy": DEFAULT_NETWORK_POLICY,
+        "network_policy": "tor",
         "allow_brave_browser": False,
         "sandbox_default": "strict",
         "vault": {
@@ -232,7 +232,7 @@ POSTURE_PREVIEW_KEYS = (
     "app_overrides",
 )
 
-SCORE_WEIGHTS = {
+SCORE_WEIGHTS: dict[str, dict[object, dict[str, int]]] = {
     "network_policy": {
         "direct": {"protection": -2, "convenience": 2},
         "tor": {"protection": 1, "convenience": 0},
@@ -493,7 +493,7 @@ def compute_posture_scores(effective: object) -> dict[str, int]:
         protection += int(pair["protection"])
         convenience += int(pair["convenience"])
 
-    network_policy = str(raw.get("network_policy", "tor")).strip().lower()
+    network_policy = str(raw.get("network_policy", DEFAULT_NETWORK_POLICY)).strip().lower()
     apply_weight("network_policy", network_policy)
 
     sandbox_default = str(raw.get("sandbox_default", "focused")).strip().lower()

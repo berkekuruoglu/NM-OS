@@ -1,6 +1,6 @@
 # NM-OS
 
-NM-OS is a desktop operating system designed for everyone — not just technical users.
+NM-OS is a privacy-focused Linux desktop for people who want stronger protection without becoming security experts.
 
 It works out of the box, gets out of your way, and lets you go as deep as you want when you're ready.
 Whether you want a quiet daily computer or a hardened private workspace, NM-OS grows with you.
@@ -16,15 +16,9 @@ Whether you want a quiet daily computer or a hardened private workspace, NM-OS g
 
 ## Who Is NM-OS For?
 
-Anyone. There is no "correct" type of user.
-
-A student can use it for homework and switch to a distraction-free mode during exams.
-A small business owner can use it for everyday office tasks.
-A journalist or researcher can activate stronger privacy when it matters.
-A developer can go deep into system settings and security policies.
-
-None of these people need to be different kinds of users. They are all the same person
-at different moments — and NM-OS lets them switch modes without switching computers.
+NM-OS is built first for privacy-conscious people who want a practical Linux desktop without expert-only controls.
+A student, small business owner, journalist, or researcher can start with a familiar daily environment and activate
+stronger boundaries when the situation calls for them.
 
 ## How NM-OS Works
 
@@ -33,8 +27,8 @@ NM-OS gives you four protection levels, which you can switch between at any time
 | Level | What it means |
 |---|---|
 | **Relaxed** | Easiest to use. Great for trusted home networks. |
-| **Balanced** | Recommended default. Private and practical. |
-| **Hardened** | Stronger daily protection with a little less convenience. |
+| **Balanced** | Recommended default. Direct networking with strong tracking protection. |
+| **Hardened** | Tor-routed networking with stricter app and device boundaries. |
 | **Maximum** | Highest practical restriction. For sensitive situations. |
 
 Every setting inside each level can also be turned on or off individually.

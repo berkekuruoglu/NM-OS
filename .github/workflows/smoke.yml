@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
-          python -m pip install ruff mypy pytest
+          python -m pip install -r requirements-dev.txt
           sudo apt-get update
           sudo apt-get install -y shellcheck
 
@@ -69,7 +69,7 @@ jobs:
     needs: smoke
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Build Dependencies
         shell: bash
@@ -97,7 +97,7 @@ jobs:
           bash ./build/smoke-overlay.sh
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: nmos-build-dist
           path: dist/
@@ -108,10 +108,10 @@ jobs:
     needs: build-smoke
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: nmos-build-dist
           path: dist/
@@ -133,7 +133,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Verify PowerShell Wrappers And WSL Bridge
         shell: pwsh

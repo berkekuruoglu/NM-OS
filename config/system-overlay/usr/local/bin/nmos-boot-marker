@@ -18,7 +18,7 @@ try:
     data = json.loads(path.read_text(encoding="utf-8"))
 except Exception:
     data = {}
-print(str(data.get("network_policy", "tor")))
+print(str(data.get("network_policy", "direct")))
 PY
     )"
     echo "NMOS_NETWORK_POLICY ${policy}"

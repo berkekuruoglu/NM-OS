@@ -26,6 +26,21 @@ grep -q 'write_tor_firewall_rules' "${BOOTSTRAP_FILE}" || {
     exit 1
 }
 
+grep -q 'redirect to :{TOR_TRANSPARENT_PORT}' "${BOOTSTRAP_FILE}" || {
+    echo "network bootstrap does not transparently redirect TCP through Tor." >&2
+    exit 1
+}
+
+grep -q 'redirect to :{TOR_DNS_PORT}' "${BOOTSTRAP_FILE}" || {
+    echo "network bootstrap does not transparently redirect DNS through Tor." >&2
+    exit 1
+}
+
+if sed -n '/^def main()/,/^if __name__/p' "${BOOTSTRAP_FILE}" | grep -q 'remove_firewall_gate'; then
+    echo "network bootstrap removes Tor enforcement after bootstrap." >&2
+    exit 1
+fi
+
 if grep -q 'load_boot_mode_profile' "${BOOTSTRAP_FILE}"; then
     echo "network bootstrap still reads boot mode state." >&2
     exit 1

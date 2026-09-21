@@ -9,6 +9,7 @@ import dbus.mainloop.glib
 import dbus.service
 from gi.repository import GLib
 from nmos_common.platform_adapter import get_gdm_user, get_settings_admin_group
+from nmos_common.update_client import DBUS_NAME, DBUS_PATH, DBUS_READ_INTERFACE, DBUS_WRITE_INTERFACE
 from nmos_common.update_engine import (
     UpdateEngineError,
     acknowledge_healthy_boot,
@@ -20,7 +21,6 @@ from nmos_common.update_engine import (
     rollback_to_previous_slot,
     stage_update,
 )
-from nmos_common.update_client import DBUS_NAME, DBUS_PATH, DBUS_READ_INTERFACE, DBUS_WRITE_INTERFACE
 from nmos_settings.authorization import build_write_uid_allowlist, is_write_authorized
 
 LOGGER = logging.getLogger("nmos.update.service")

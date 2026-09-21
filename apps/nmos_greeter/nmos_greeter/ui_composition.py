@@ -482,7 +482,7 @@ def _select_profile(window, profile: str) -> None:
 
 
 def _select_network_policy(window, network_policy: str) -> None:
-    normalized = str(network_policy or "tor").strip().lower()
+    normalized = str(network_policy or "direct").strip().lower()
     _select_string(window.network_policy_combo, NETWORK_POLICY_OPTIONS, normalized)
 
 
@@ -503,7 +503,7 @@ def restore_state(window) -> None:
     locale = window.state.get("locale", "en_US.UTF-8")
     keyboard = window.state.get("keyboard", "us")
     profile = window.state.get("active_profile", "balanced")
-    network_policy = window.state.get("network_policy", "tor")
+    network_policy = window.state.get("network_policy", "direct")
     browser = window.state.get("default_browser", window.state.get("browser", "firefox-esr"))
     _select_language(window, locale)
     _select_string(window.keyboard_combo, KEYBOARD_OPTIONS, keyboard)

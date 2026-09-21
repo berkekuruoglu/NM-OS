@@ -13,7 +13,7 @@ STATUS_FILE = RUNTIME_DIR / "network-status.json"
 
 def read_status() -> dict:
     settings = load_effective_system_settings()
-    policy = str(settings.get("network_policy", "tor"))
+    policy = str(settings.get("network_policy", "direct"))
     if policy == "offline":
         return normalize_network_status(
             {

@@ -1,0 +1,34 @@
+{
+  "policies": {
+    "DisableTelemetry": true,
+    "EnableTrackingProtection": {
+      "Value": true,
+      "Locked": false,
+      "Cryptomining": true,
+      "Fingerprinting": true,
+      "EmailTracking": true
+    },
+    "Preferences": {
+      "privacy.globalprivacycontrol.enabled": {
+        "Value": true,
+        "Status": "default"
+      },
+      "privacy.partition.network_state": {
+        "Value": true,
+        "Status": "default"
+      },
+      "privacy.query_stripping.enabled": {
+        "Value": true,
+        "Status": "default"
+      },
+      "privacy.trackingprotection.socialtracking.enabled": {
+        "Value": true,
+        "Status": "default"
+      },
+      "network.cookie.cookieBehavior": {
+        "Value": 5,
+        "Status": "default"
+      }
+    }
+  }
+}

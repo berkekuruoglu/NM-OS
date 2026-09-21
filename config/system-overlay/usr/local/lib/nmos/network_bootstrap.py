@@ -17,6 +17,8 @@ READY_DIR = get_runtime_dir()
 READY_FILE = READY_DIR / "network-ready"
 STATUS_FILE = READY_DIR / "network-status.json"
 TOR_CONTROL_PORT = 9051
+TOR_TRANSPARENT_PORT = 9040
+TOR_DNS_PORT = 5353
 BOOTSTRAP_TIMEOUT_SECONDS = 300
 SERVICE_START_TIMEOUT_SECONDS = 20
 
@@ -67,18 +69,16 @@ def write_status(
     )
 
 
-def write_tor_firewall_rules() -> None:
-    ensure_nft_available()
-    import pwd
-
-    getpwnam = getattr(pwd, "getpwnam", None)
-    if getpwnam is None:
-        raise RuntimeError("pwd.getpwnam is unavailable on this platform")
-    tor_user = get_tor_user()
-    tor_uid = getpwnam(tor_user).pw_uid
-    subprocess.run(["nft", "delete", "table", "inet", "nmosfilter"], check=False)
-    rules = f"""
+def render_tor_firewall_rules(tor_uid: int) -> str:
+    return f"""
 table inet nmosfilter {{
+  chain redirect_output {{
+    type nat hook output priority dstnat; policy accept;
+    meta skuid {tor_uid} return
+    oifname "lo" return
+    udp dport 53 redirect to :{TOR_DNS_PORT}
+    tcp flags & (fin | syn | rst | ack) == syn redirect to :{TOR_TRANSPARENT_PORT}
+  }}
   chain input {{
     type filter hook input priority 0; policy drop;
     iifname "lo" accept
@@ -88,14 +88,26 @@ table inet nmosfilter {{
     type filter hook output priority 0; policy drop;
     oifname "lo" accept
     ct state established,related accept
-    meta skuid 0 udp dport {{ 53, 67, 68, 123 }} accept
+    meta skuid 0 udp dport {{ 67, 68, 123 }} accept
     meta skuid {tor_uid} udp dport {{ 53, 123 }} accept
-    meta skuid 0 tcp dport 53 accept
     meta skuid {tor_uid} tcp dport 53 accept
     meta skuid {tor_uid} accept
   }}
 }}
 """
+
+
+def write_tor_firewall_rules() -> None:
+    ensure_nft_available()
+    import pwd
+
+    getpwnam = getattr(pwd, "getpwnam", None)
+    if getpwnam is None:
+        raise RuntimeError("pwd.getpwnam is unavailable on this platform")
+    tor_user = get_tor_user()
+    tor_uid = int(getpwnam(tor_user).pw_uid)
+    subprocess.run(["nft", "delete", "table", "inet", "nmosfilter"], check=False)
+    rules = render_tor_firewall_rules(tor_uid)
     subprocess.run(["nft", "-f", "-"], input=rules, text=True, check=True)
 
 
@@ -223,7 +235,7 @@ def apply_direct_mode() -> None:
 
 def main() -> None:
     settings = load_effective_system_settings()
-    policy = str(settings.get("network_policy", "tor"))
+    policy = str(settings.get("network_policy", "direct"))
     READY_DIR.mkdir(parents=True, exist_ok=True)
     if policy == "offline":
         apply_offline_mode()
@@ -238,8 +250,7 @@ def main() -> None:
         write_tor_firewall_rules()
         write_status(ready=False, progress=0, summary="Waiting for Tor bootstrap", phase="bootstrap")
         wait_for_tor()
-        remove_firewall_gate()
-        mark_ready("Tor is ready")
+        mark_ready("Tor is ready; TCP and DNS traffic are routed through Tor.", phase="tor-routed")
     except Exception as exc:
         write_status(
             ready=False,

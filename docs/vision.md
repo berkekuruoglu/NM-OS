@@ -1,9 +1,9 @@
 # Product Direction
 
-NM-OS is a desktop operating system designed for everyone.
+NM-OS is a privacy-focused Linux desktop for people who want stronger protection without becoming security experts.
 
-The goal is to give any person  -  regardless of technical background  -  a computer that works
-immediately, feels personal, and can grow as strict or as open as they need it to be.
+The goal is to give privacy-conscious people a computer that works immediately, feels personal,
+and can grow as strict or as open as they need it to be.
 
 ## Core Principles
 
@@ -89,4 +89,3 @@ and platform defaults. Over time, more of those layers move under NM-OS control.
 4. Keep profiles readable and explainable with plain-language tradeoff summaries.
 5. Tie every security setting to a real enforcement layer or mark it explicitly partial.
 6. Treat installer, recovery, and updates as part of the platform identity.
-

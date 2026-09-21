@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 from pathlib import Path
+from typing import cast
 
 import gi
 
@@ -33,7 +34,6 @@ from nmos_common.runtime_state import (
     write_runtime_text,
 )
 from nmos_common.settings_client import SettingsClient, SettingsClientError
-from nmos_common.update_client import UpdateClient, UpdateClientError
 from nmos_common.system_settings import (
     ACCENT_LABELS,
     DEFAULT_SYSTEM_SETTINGS,
@@ -50,8 +50,15 @@ from nmos_common.system_settings import (
     setting_display_name,
 )
 from nmos_common.ui_theme import apply_window_theme, load_css
+from nmos_common.update_client import UpdateClient, UpdateClientError
 
 KEYBOARD_OPTIONS = ("us", "tr", "de", "fr")
+
+
+def as_object_dict(value: object) -> dict[str, object]:
+    if isinstance(value, dict):
+        return cast(dict[str, object], value)
+    return {}
 NETWORK_OPTIONS = (
     ("tor", "Tor-first"),
     ("direct", "Direct network"),
@@ -680,7 +687,7 @@ class ControlCenterWindow(Adw.ApplicationWindow):
 
     def snapshot_current_settings(self, *, reason: str) -> bool:
         current_settings = normalize_system_settings(self.settings)
-        snapshot = {
+        snapshot: dict[str, object] = {
             "taken_at": self._current_timestamp(),
             "reason": reason,
             "settings": current_settings,
@@ -731,7 +738,7 @@ class ControlCenterWindow(Adw.ApplicationWindow):
 
     def format_recovery_status(self) -> str:
         snapshot = self.load_settings_snapshot()
-        snapshot_settings = snapshot.get("settings", {}) if isinstance(snapshot.get("settings", {}), dict) else {}
+        snapshot_settings = as_object_dict(snapshot.get("settings", {}))
         snapshot_profile = str(snapshot_settings.get("active_profile", "unknown"))
         snapshot_time = str(snapshot.get("taken_at", "not captured"))
         snapshot_reason = str(snapshot.get("reason", "No rollback snapshot captured yet."))
@@ -915,7 +922,7 @@ class ControlCenterWindow(Adw.ApplicationWindow):
         manifest = self.load_release_manifest()
         if not manifest:
             return False, "Update blocked: release manifest metadata is unavailable."
-        signing = manifest.get("signing", {}) if isinstance(manifest.get("signing", {}), dict) else {}
+        signing = as_object_dict(manifest.get("signing", {}))
         signature_verified = bool(signing.get("signature_verified") is True)
         signing_mode = str(signing.get("mode", "")).strip().lower()
         if signature_verified:
@@ -935,11 +942,7 @@ class ControlCenterWindow(Adw.ApplicationWindow):
         if not trusted_ok:
             return False, trusted_message
         manifest = self.load_release_manifest()
-        upgrade_policy = (
-            manifest.get("upgrade_policy", {})
-            if isinstance(manifest.get("upgrade_policy", {}), dict)
-            else {}
-        )
+        upgrade_policy = as_object_dict(manifest.get("upgrade_policy", {}))
         supports_rollback_raw = str(upgrade_policy.get("supports_rollback", "")).strip().lower()
         supports_rollback = supports_rollback_raw in {"1", "true", "yes", "on"}
         if supports_rollback:
@@ -1000,10 +1003,10 @@ class ControlCenterWindow(Adw.ApplicationWindow):
         version = self.read_installed_version()
         channel = str(manifest.get("channel", "")).strip() or self.detect_release_channel(version)
         build_id = str(manifest.get("build_id", "")).strip() or str(build_info.get("BUILD_TIMESTAMP", "unknown")).strip()
-        artifacts = manifest.get("artifacts", {}) if isinstance(manifest.get("artifacts", {}), dict) else {}
-        installer_iso = artifacts.get("installer_iso", {}) if isinstance(artifacts.get("installer_iso", {}), dict) else {}
+        artifacts = as_object_dict(manifest.get("artifacts", {}))
+        installer_iso = as_object_dict(artifacts.get("installer_iso", {}))
         artifact_name = str(installer_iso.get("name", "")).strip() or str(manifest.get("installer_iso", "unknown"))
-        signing = manifest.get("signing", {}) if isinstance(manifest.get("signing", {}), dict) else {}
+        signing = as_object_dict(manifest.get("signing", {}))
         signing_mode = str(signing.get("mode", "")).strip()
         if signing.get("signature_verified") is True:
             signature_state = "detached signatures verified"
@@ -1013,11 +1016,7 @@ class ControlCenterWindow(Adw.ApplicationWindow):
             signature_state = signing_mode
         else:
             signature_state = "not available in current build"
-        upgrade_policy = (
-            manifest.get("upgrade_policy", {})
-            if isinstance(manifest.get("upgrade_policy", {}), dict)
-            else {}
-        )
+        upgrade_policy = as_object_dict(manifest.get("upgrade_policy", {}))
         minimum_source_version = str(upgrade_policy.get("minimum_source_version", "unknown"))
         rollback_support = str(upgrade_policy.get("supports_rollback", "unknown")).lower()
         verification = "partial"
@@ -1166,7 +1165,7 @@ class ControlCenterWindow(Adw.ApplicationWindow):
         profile = str(settings.get("active_profile", "balanced"))
         locale = resolve_supported_locale(settings.get("locale", "en_US.UTF-8"))
         keyboard = str(settings.get("keyboard", "us"))
-        network_policy = str(settings.get("network_policy", "tor"))
+        network_policy = str(settings.get("network_policy", "direct"))
         sandbox_default = str(settings.get("sandbox_default", "focused"))
         device_policy = str(settings.get("device_policy", "prompt"))
         logging_policy = str(settings.get("logging_policy", "minimal"))
@@ -1528,7 +1527,7 @@ class ControlCenterWindow(Adw.ApplicationWindow):
         if not self._guard_backend_mutation():
             return
         snapshot = self.load_settings_snapshot()
-        target_settings = snapshot.get("settings", {}) if isinstance(snapshot.get("settings", {}), dict) else {}
+        target_settings = as_object_dict(snapshot.get("settings", {}))
         if not target_settings:
             self.recovery_status_label.set_text(self.format_recovery_status())
             self.status_label.set_text("No rollback snapshot is available yet.")
