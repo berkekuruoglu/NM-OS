@@ -59,6 +59,7 @@ d-i partman-auto/expert_recipe string                         \
                       method{ swap } format{ }                \
               .
 d-i grub-installer/bootdev string default
+d-i cdrom-detect/eject boolean true
 d-i pkgsel/upgrade select none
 d-i finish-install/reboot_in_progress note
 

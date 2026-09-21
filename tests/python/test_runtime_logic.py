@@ -1578,6 +1578,15 @@ def test_installer_media_and_assets_are_packaged(repo_root: Path) -> None:
     installer_preseed = (
         repo_root / "config" / "installer" / "debian-installer" / "preseed" / "nmos.cfg.in"
     ).read_text(encoding="utf-8")
+    installer_grub_menu = (
+        repo_root / "config" / "installer" / "boot-menu" / "grub.cfg"
+    ).read_text(encoding="utf-8")
+    installer_bios_menu = (
+        repo_root / "config" / "installer" / "boot-menu" / "txt.cfg"
+    ).read_text(encoding="utf-8")
+    ab_prepare_script = (
+        repo_root / "config" / "installer" / "experimental-ab" / "prepare-target.sh"
+    ).read_text(encoding="utf-8")
     base_iso_lock = (
         repo_root / "config" / "installer" / "base-iso.lock"
     ).read_text(encoding="utf-8")
@@ -1604,7 +1613,7 @@ def test_installer_media_and_assets_are_packaged(repo_root: Path) -> None:
     assert "base ISO lock is incomplete" in common_source
     assert "installer_iso_name" in common_source
     assert 'chmod -R u+w "${INSTALLER_ISO_TREE_DIR}"' in common_source
-    assert "preseed/file=/cdrom/preseed/nmos.cfg" in common_source
+    assert "preseed/file=/cdrom/preseed/nmos.cfg" in installer_grub_menu
     assert 'sub(/^\\.\\//, "", path)' in common_source
     assert 'sub(/^\\*/, "", path)' in common_source
     assert "xorriso -osirrox on -indev" in verify_artifacts_source
@@ -1617,6 +1626,11 @@ def test_installer_media_and_assets_are_packaged(repo_root: Path) -> None:
     assert "productName: \"NM-OS\"" in branding_source
     assert "@PKGSEL_INCLUDE@" in installer_preseed
     assert "in-target /bin/bash /root/nmos-install-overlay.sh" in installer_preseed
+    assert "Install NM-OS (erases the target disk)" in installer_grub_menu
+    assert "set timeout=-1" in installer_grub_menu
+    assert "auto=true priority=critical" in installer_grub_menu
+    assert "menu default" in installer_bios_menu
+    assert "install -Dm" not in ab_prepare_script
     assert 'tar -xzf "${OVERLAY_ARCHIVE}" -C /' in late_command_template
     assert "ISO_FILE=debian-" in base_iso_lock
     assert "SHA256=" in base_iso_lock

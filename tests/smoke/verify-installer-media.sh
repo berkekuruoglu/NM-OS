@@ -9,6 +9,8 @@ VERIFY_ARTIFACTS_SH="${ROOT_DIR}/build/verify-artifacts.sh"
 PRESEED_TEMPLATE="${ROOT_DIR}/config/installer/debian-installer/preseed/nmos.cfg.in"
 LATE_COMMAND_TEMPLATE="${ROOT_DIR}/config/installer/debian-installer/preseed/install-overlay.sh.in"
 INSTALLATION_DOC="${ROOT_DIR}/docs/installation.md"
+BOOT_MENU_DIR="${ROOT_DIR}/config/installer/boot-menu"
+AB_PREPARE_SCRIPT="${ROOT_DIR}/config/installer/experimental-ab/prepare-target.sh"
 
 for path in \
     "${COMMON_SH}" \
@@ -16,6 +18,10 @@ for path in \
     "${VERIFY_ARTIFACTS_SH}" \
     "${PRESEED_TEMPLATE}" \
     "${LATE_COMMAND_TEMPLATE}" \
+    "${BOOT_MENU_DIR}/grub.cfg" \
+    "${BOOT_MENU_DIR}/menu.cfg" \
+    "${BOOT_MENU_DIR}/txt.cfg" \
+    "${AB_PREPARE_SCRIPT}" \
     "${INSTALLATION_DOC}"; do
     [ -f "${path}" ] || {
         echo "missing installer media path: ${path}" >&2
@@ -48,8 +54,33 @@ grep -q 'chmod -R u+w "${INSTALLER_ISO_TREE_DIR}"' "${COMMON_SH}" || {
     exit 1
 }
 
-grep -q 'preseed/file=/cdrom/preseed/nmos.cfg' "${COMMON_SH}" || {
+grep -q 'preseed/file=/cdrom/preseed/nmos.cfg' "${BOOT_MENU_DIR}/grub.cfg" || {
     echo "build helpers do not wire the Debian installer menus to the NM-OS preseed." >&2
+    exit 1
+}
+
+grep -q 'cp "${INSTALLER_BOOT_MENU_SOURCE}/grub.cfg"' "${COMMON_SH}" || {
+    echo "build helpers do not replace the Debian UEFI menu with the NM-OS menu." >&2
+    exit 1
+}
+
+grep -q "Install NM-OS (erases the target disk)" "${BOOT_MENU_DIR}/grub.cfg" || {
+    echo "UEFI menu does not present the plain-language NM-OS install action." >&2
+    exit 1
+}
+
+grep -q 'set timeout=-1' "${BOOT_MENU_DIR}/grub.cfg" || {
+    echo "UEFI menu does not require an explicit install choice." >&2
+    exit 1
+}
+
+grep -q 'auto=true priority=critical' "${BOOT_MENU_DIR}/grub.cfg" || {
+    echo "UEFI menu does not start the unattended installer." >&2
+    exit 1
+}
+
+grep -q 'menu default' "${BOOT_MENU_DIR}/txt.cfg" || {
+    echo "BIOS menu does not select the recommended NM-OS action by default." >&2
     exit 1
 }
 
@@ -105,6 +136,16 @@ fi
 
 grep -q 'prepare-target.sh' "${PRESEED_TEMPLATE}" || {
     echo "installer preseed template does not run the experimental A/B target preparation step." >&2
+    exit 1
+}
+
+if grep -Eq '(^|[[:space:]])install[[:space:]]+-D' "${AB_PREPARE_SCRIPT}"; then
+    echo "A/B target preparation uses the unavailable Debian Installer install helper." >&2
+    exit 1
+fi
+
+grep -q 'cdrom-detect/eject boolean true' "${PRESEED_TEMPLATE}" || {
+    echo "installer preseed does not eject its media before reboot." >&2
     exit 1
 }
 

@@ -53,5 +53,6 @@ Typical next steps are:
 1. open VirtualBox or another hypervisor
 2. create a fresh VM with at least 4 GB RAM, 2 virtual CPUs, and a 64 GB disk
 3. mount `dist\nmos-installer-<version>-amd64.iso`
-4. boot and choose `Install NM-OS`
-5. finish installation and reboot into the installed system
+4. boot, choose `Install NM-OS (erases the target disk)`, and press Enter
+5. wait for the unattended setup to finish, then sign in as `nmos` with password `nmos`
+6. test the greeter, profiles, vault, updates, and recovery in the installed system

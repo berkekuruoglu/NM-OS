@@ -19,6 +19,7 @@ BASE_ISO_LOCK_FILE="${ROOT_DIR}/config/installer/base-iso.lock"
 PLATFORM_ADAPTER_SOURCE="${SYSTEM_OVERLAY_SOURCE}/etc/nmos/platform-adapter.env"
 INSTALLER_PRESEED_TEMPLATE="${ROOT_DIR}/config/installer/debian-installer/preseed/nmos.cfg.in"
 INSTALLER_LATE_COMMAND_TEMPLATE="${ROOT_DIR}/config/installer/debian-installer/preseed/install-overlay.sh.in"
+INSTALLER_BOOT_MENU_SOURCE="${ROOT_DIR}/config/installer/boot-menu"
 APPS_SOURCE="${ROOT_DIR}/apps"
 TARGET_PYTHON_DIR="${ROOTFS_DIR}/usr/lib/python3/dist-packages"
 DEBIAN_NETINST_BASE_URL="${NMOS_DEBIAN_NETINST_BASE_URL:-https://cdimage.debian.org/debian-cd/current/amd64/iso-cd}"
@@ -463,37 +464,23 @@ render_installer_preseed_files() {
 
 patch_debian_installer_menu() {
     local stage_dir="$1"
+    local isolinux_menu_cfg="${stage_dir}/isolinux/menu.cfg"
     local isolinux_cfg="${stage_dir}/isolinux/txt.cfg"
     local grub_cfg="${stage_dir}/boot/grub/grub.cfg"
 
-    [ -f "${isolinux_cfg}" ] || {
-        echo "Debian installer BIOS menu is missing: ${isolinux_cfg}" >&2
-        exit 1
-    }
-    [ -f "${grub_cfg}" ] || {
-        echo "Debian installer UEFI menu is missing: ${grub_cfg}" >&2
-        exit 1
-    }
+    for path in \
+        "${INSTALLER_BOOT_MENU_SOURCE}/menu.cfg" \
+        "${INSTALLER_BOOT_MENU_SOURCE}/txt.cfg" \
+        "${INSTALLER_BOOT_MENU_SOURCE}/grub.cfg"; do
+        [ -f "${path}" ] || {
+            echo "NM-OS installer boot menu is missing: ${path}" >&2
+            exit 1
+        }
+    done
 
-    if ! grep -q '^label nmos-install$' "${isolinux_cfg}"; then
-        cat >> "${isolinux_cfg}" <<'EOF'
-
-label nmos-install
-    menu label ^Install NM-OS
-    kernel /install.amd/vmlinuz
-    append priority=high preseed/file=/cdrom/preseed/nmos.cfg initrd=/install.amd/initrd.gz ---
-EOF
-    fi
-
-    if ! grep -q "^menuentry 'Install NM-OS'" "${grub_cfg}"; then
-        cat >> "${grub_cfg}" <<'EOF'
-
-menuentry 'Install NM-OS' {
-    linux    /install.amd/vmlinuz priority=high preseed/file=/cdrom/preseed/nmos.cfg ---
-    initrd   /install.amd/initrd.gz
-}
-EOF
-    fi
+    cp "${INSTALLER_BOOT_MENU_SOURCE}/menu.cfg" "${isolinux_menu_cfg}"
+    cp "${INSTALLER_BOOT_MENU_SOURCE}/txt.cfg" "${isolinux_cfg}"
+    cp "${INSTALLER_BOOT_MENU_SOURCE}/grub.cfg" "${grub_cfg}"
 }
 
 refresh_installer_md5sums() {

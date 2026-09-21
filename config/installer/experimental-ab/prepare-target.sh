@@ -46,7 +46,11 @@ mkdir -p "${TARGET_ROOT}/etc/nmos" \
          "${TARGET_ROOT}/etc/default/grub.d"
 
 if [ -f "${PROFILE_SOURCE}" ]; then
-    install -Dm0644 "${PROFILE_SOURCE}" "${TARGET_ROOT}/etc/nmos/installer-profile.json"
+    # Debian Installer's runtime is intentionally small and does not provide
+    # the coreutils `install` helper. Keep this preparation step compatible
+    # with that environment by using the tools d-i guarantees are present.
+    cp "${PROFILE_SOURCE}" "${TARGET_ROOT}/etc/nmos/installer-profile.json"
+    chmod 0644 "${TARGET_ROOT}/etc/nmos/installer-profile.json"
 fi
 
 cat > "${AB_LAYOUT_FILE}" <<EOF
@@ -120,7 +124,8 @@ if [ -e "${SLOT_B_DEVICE}" ]; then
         tar -xpf -
     )
     mkdir -p "${SLOT_B_MOUNT}/etc/nmos"
-    install -Dm0644 "${AB_LAYOUT_FILE}" "${SLOT_B_MOUNT}/etc/nmos/ab-layout.env"
+    cp "${AB_LAYOUT_FILE}" "${SLOT_B_MOUNT}/etc/nmos/ab-layout.env"
+    chmod 0644 "${SLOT_B_MOUNT}/etc/nmos/ab-layout.env"
     render_fstab "b" > "${SLOT_B_MOUNT}/etc/fstab"
     printf '%s\n' "slot=b" > "${SLOT_B_MOUNT}/etc/nmos/slot-id"
     if [ -f "${SLOT_B_MOUNT}/etc/grub.d/09_nmos_ab" ]; then

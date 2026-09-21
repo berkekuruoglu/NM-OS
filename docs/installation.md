@@ -21,9 +21,11 @@ NM-OS now publishes a bootable installer ISO for VM and hardware testing.
 1. Build the repository outputs.
 2. Create a new VM in VirtualBox, VMware, or QEMU with at least 4 GB RAM, 2 virtual CPUs, and a 64 GB disk.
 3. Boot the VM from `nmos-installer-<version>-amd64.iso`.
-4. Choose `Install NM-OS`.
-5. Finish the Debian-based installer flow.
-6. Reboot into the installed system and test the greeter, profiles, vault, and control center.
+4. Choose `Install NM-OS (erases the target disk)` and press Enter.
+5. Wait while setup partitions the VM disk, downloads packages, and installs NM-OS. No other installer choices are required.
+6. After reboot, sign in with username `nmos` and password `nmos`, then test the greeter, profiles, vault, and control center.
+
+The installer only changes the disk attached to the test VM. Do not use the current alpha installer on a computer or disk that contains important data.
 
 ## What the installer ISO does
 
@@ -53,6 +55,8 @@ The overlay archive is still useful for manual testing or layering NM-OS onto an
 ## Installer notes
 
 - the current installer path uses Debian-installer media with an NM-OS preseed and overlay payload
+- the first screen contains one clearly labelled install action; Debian rescue tools are kept under `Advanced options`
 - the preseed detects the VM's primary disk and applies an unattended experimental A/B partition recipe
+- the installer requires an explicit Enter press before erasing the VM disk, then continues unattended
 - Calamares branding and module scaffolding remain in the repo for the richer desktop installer path
 - netinst media still expects network access during installation

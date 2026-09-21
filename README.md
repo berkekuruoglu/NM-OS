@@ -86,8 +86,8 @@ Detailed instructions and supported overrides are in the [build guide](docs/buil
 
 1. Build the installer ISO.
 2. Boot it in QEMU, VirtualBox, VMware, or another virtual machine.
-3. Choose `Install NM-OS` and complete the installer.
-4. Reboot into the installed system.
+3. Choose `Install NM-OS (erases the target disk)` and press Enter. The remaining installation is automatic.
+4. Reboot and sign in with username `nmos` and password `nmos`.
 5. Exercise setup, profile switching, networking, the encrypted vault, updates, and recovery.
 
 See the [installation guide](docs/installation.md) for the current workflow.
