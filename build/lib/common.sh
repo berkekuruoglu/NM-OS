@@ -392,7 +392,11 @@ resolve_base_installer_iso() {
     printf '%s  %s\n' "${checksum_value}" "${iso_file}" > "${checksum_file}"
 
     if [ ! -s "${iso_path}" ]; then
-        curl -fL "${resolved_base_url}/${iso_file}" -o "${iso_path}.tmp"
+        if ! curl -fL "${resolved_base_url}/${iso_file}" -o "${iso_path}.tmp"; then
+            rm -f "${iso_path}.tmp"
+            echo "failed to download pinned Debian installer ISO: ${resolved_base_url}/${iso_file}" >&2
+            exit 1
+        fi
         mv "${iso_path}.tmp" "${iso_path}"
     fi
 

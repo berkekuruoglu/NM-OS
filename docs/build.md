@@ -96,8 +96,8 @@ NMOS_BASE_INSTALLER_ISO_PATH=/path/to/debian-amd64-netinst.iso ./build/build.sh
 Pinned base ISO metadata override:
 
 ```bash
-NMOS_BASE_INSTALLER_BASE_URL=https://mirror.example/debian-cd/13.4.0/amd64/iso-cd \
-NMOS_BASE_INSTALLER_ISO_FILE=debian-13.4.0-amd64-netinst.iso \
+NMOS_BASE_INSTALLER_BASE_URL=https://mirror.example/debian-cd/13.7.0/amd64/iso-cd \
+NMOS_BASE_INSTALLER_ISO_FILE=debian-13.7.0-amd64-netinst.iso \
 NMOS_BASE_INSTALLER_SHA256=<sha256> \
 ./build/build.sh
 ```
