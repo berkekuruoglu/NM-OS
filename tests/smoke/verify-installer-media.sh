@@ -88,6 +88,21 @@ grep -q 'partman-auto/expert_recipe string' "${PRESEED_TEMPLATE}" || {
     exit 1
 }
 
+grep -q 'list-devices disk' "${PRESEED_TEMPLATE}" || {
+    echo "installer preseed does not discover the target disk dynamically." >&2
+    exit 1
+}
+
+grep -q 'debconf-set partman-auto/disk' "${PRESEED_TEMPLATE}" || {
+    echo "installer preseed does not apply the dynamically discovered target disk." >&2
+    exit 1
+}
+
+if grep -q '/dev/vda' "${PRESEED_TEMPLATE}"; then
+    echo "installer preseed still hard-codes the QEMU-only /dev/vda target." >&2
+    exit 1
+fi
+
 grep -q 'prepare-target.sh' "${PRESEED_TEMPLATE}" || {
     echo "installer preseed template does not run the experimental A/B target preparation step." >&2
     exit 1

@@ -19,7 +19,11 @@ d-i passwd/username string nmos
 d-i passwd/user-password password nmos
 d-i passwd/user-password-again password nmos
 d-i user-setup/allow-password-weak boolean true
-d-i partman-auto/disk string /dev/vda
+d-i partman/early_command string \
+    disk="$(list-devices disk | head -n 1)"; \
+    test -n "${disk}"; \
+    debconf-set partman-auto/disk "${disk}"; \
+    debconf-set grub-installer/bootdev "${disk}"
 d-i partman-auto/method string regular
 d-i partman-partitioning/confirm_write_new_label boolean true
 d-i partman/confirm_write_new_label boolean true
@@ -54,7 +58,7 @@ d-i partman-auto/expert_recipe string                         \
               1024 1024 4096 linux-swap                       \
                       method{ swap } format{ }                \
               .
-d-i grub-installer/bootdev string /dev/vda
+d-i grub-installer/bootdev string default
 d-i pkgsel/upgrade select none
 d-i finish-install/reboot_in_progress note
 

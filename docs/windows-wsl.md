@@ -51,7 +51,7 @@ If you want the optional Brave-aware overlay:
 Typical next steps are:
 
 1. open VirtualBox or another hypervisor
-2. create a fresh VM
+2. create a fresh VM with at least 4 GB RAM, 2 virtual CPUs, and a 64 GB disk
 3. mount `dist\nmos-installer-<version>-amd64.iso`
 4. boot and choose `Install NM-OS`
 5. finish installation and reboot into the installed system

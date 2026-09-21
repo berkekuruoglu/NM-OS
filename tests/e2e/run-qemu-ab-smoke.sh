@@ -30,7 +30,7 @@ mkdir -p "${WORK_DIR}"
 xorriso -osirrox on -indev "${ISO_PATH}" \
     -extract /install.amd/vmlinuz "${VMLINUX_PATH}" \
     -extract /install.amd/initrd.gz "${INITRD_PATH}" >/dev/null 2>&1
-qemu-img create -f qcow2 "${DISK_PATH}" 40G >/dev/null
+qemu-img create -f qcow2 "${DISK_PATH}" 64G >/dev/null
 
 timeout 45m qemu-system-x86_64 \
     -m 4096 \
