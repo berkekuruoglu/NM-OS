@@ -3,4 +3,4 @@
 set -euo pipefail
 
 export PYTHONUNBUFFERED=1
-exec python3 -m nmos_help.main
+exec python3 -m nmos_help.main "$@"
