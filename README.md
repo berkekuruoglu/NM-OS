@@ -1,155 +1,131 @@
 # NM-OS
 
 NM-OS is a privacy-focused Linux desktop for people who want stronger protection without becoming security experts.
+It combines a familiar daily environment with clear, switchable protection profiles that explain what changes and why.
 
-It works out of the box, gets out of your way, and lets you go as deep as you want when you're ready.
-Whether you want a quiet daily computer or a hardened private workspace, NM-OS grows with you.
+> **Project status:** NM-OS is alpha software (`0.1.0-alpha.1`). Evaluate it in a virtual machine before considering real hardware or sensitive work.
 
-## What Can I Do With NM-OS?
+## Why NM-OS?
 
-- Write documents, spreadsheets, and presentations (LibreOffice included)
-- Browse the web, check email, watch videos
-- Organize your photos and listen to music
-- Keep your files safe with an encrypted vault
-- Switch to a more private or focused mode in seconds — and switch back just as easily
-- Customize everything: colors, fonts, wallpaper, layout, animations
+Privacy-focused systems often ask people to choose between convenience and control before they understand the tradeoff.
+NM-OS takes a different approach:
 
-## Who Is NM-OS For?
+- start with practical defaults suitable for everyday browsing and office work
+- move to stronger isolation only when the situation calls for it
+- keep security choices visible, understandable, and reversible
+- use enforcement layers such as nftables, browser policy, application sandboxing, and encrypted storage
 
-NM-OS is built first for privacy-conscious people who want a practical Linux desktop without expert-only controls.
-A student, small business owner, journalist, or researcher can start with a familiar daily environment and activate
-stronger boundaries when the situation calls for them.
+The recommended `Balanced` profile uses direct networking with strong tracking protection. Tor routing is reserved for the explicitly selected `Hardened` profile, where the additional compatibility cost is expected.
 
-## How NM-OS Works
+## Protection Profiles
 
-NM-OS gives you four protection levels, which you can switch between at any time:
+| Profile | Network behavior | Intended use | Main tradeoff |
+|---|---|---|---|
+| **Relaxed** | Direct | Familiar daily use on trusted networks | Lighter default boundaries |
+| **Balanced** | Direct with strong tracking protection | Recommended daily profile | Privacy protections without Tor-related website friction |
+| **Hardened** | TCP and DNS routed through Tor | Private work where stronger isolation matters | More CAPTCHAs, slower connections, and reduced service compatibility |
+| **Maximum** | Offline by default | High-sensitivity, minimal-exposure work | Intentionally restrictive |
 
-| Level | What it means |
-|---|---|
-| **Relaxed** | Easiest to use. Great for trusted home networks. |
-| **Balanced** | Recommended default. Direct networking with strong tracking protection. |
-| **Hardened** | Tor-routed networking with stricter app and device boundaries. |
-| **Maximum** | Highest practical restriction. For sensitive situations. |
+Profiles are starting points rather than permanent personas. Individual controls remain available, and users can move between profiles as their needs change.
 
-Every setting inside each level can also be turned on or off individually.
-Profiles are a starting point, not a lock.
+Routing an ordinary browser through Tor does not make it equivalent to Tor Browser and does not guarantee anonymity. See the [security model](docs/security-model.md) and [internet and email guide](docs/user-guides/internet-and-email.md) for the current boundaries.
 
-## What Is Included
+## What Exists Today
 
-Today the repository builds:
+The installed desktop includes:
 
-- a bootable installer ISO
-- an installed-system overlay archive
-- installer assets
-
-The installed system includes:
-
-- a setup assistant that runs before login
-- a desktop control center
-- productivity apps (office, browser, media, photos)
+- a pre-login setup assistant with plain-language profile selection
+- a desktop control center for security, privacy, applications, and system settings
+- productivity, browser, media, and photo applications
 - an encrypted vault for sensitive files
-- network modes: direct, Tor-first, or offline
-- a rich personalization system: themes, fonts, wallpaper, density, motion
-- Debian-installer-based media for VM and hardware testing
+- direct, Tor-routed, and offline network policies
+- Firefox and Chromium privacy policies
+- Flatpak-oriented application isolation and portal controls
+- experimental A/B update, health-check, recovery, and rollback infrastructure
+- themes, fonts, wallpaper, layout, density, and motion controls
 
-The default profile is `Balanced`.
+The repository builds:
+
+- a bootable Debian-installer-based NM-OS ISO
+- an installed-system overlay archive
+- installer and recovery assets
+- update catalog and release-manifest scaffolding
 
 ## Design Principles
 
-### Human-first computing
+- **Human-first:** controls should be understandable without specialist knowledge.
+- **Explainable:** restrictions should state what changed, why, and what the user gains or loses.
+- **Reversible:** profiles and individual settings should be safe to change and easy to undo.
+- **Progressive:** begin with sensible defaults, then expose deeper control when requested.
+- **Honest:** document current limits instead of turning security goals into unsupported promises.
 
-The computer works for the user, not the other way around.
-Every feature must be understandable, reachable, and reversible.
+## Build
 
-### Fluid modes, not fixed personas
-
-Users are not categorized. Anyone can switch from a comfortable desktop to maximum
-security and back again — quickly, visibly, and without losing their previous state.
-
-### Everything is accessible, nothing is forced
-
-No feature is hidden. Security controls are always reachable.
-But nothing is mandatory beyond choosing a language and a starting profile.
-
-### Explainable choices
-
-When NM-OS restricts something, it says so clearly.
-Users see what changed, why it changed, and what they give up or gain.
-
-### Progressive depth
-
-Start with zero configuration. Go as deep as you want.
-The same platform serves a first-time Linux user and an experienced system administrator.
-
-## What Exists In The Repo
-
-- `apps/` — Python applications and services
-- `build/` — build entry points and artifact verification helpers
-- `config/system-overlay/` — runtime overlay content for the installed system
-- `config/installer/` — installer scaffolding
-- `config/system-packages/` — target runtime package manifests
-- `config/installer-packages/` — installer-side package manifests
-- `tests/` — smoke and Python validation
-- `docs/` — product direction, security model, build and install guides
-
-## Quick Start
-
-### Windows + WSL2
+### Windows with WSL2
 
 ```powershell
 .\build\install-deps.ps1
 .\build\build.ps1
 ```
 
-### Linux / WSL2 Direct
+### Linux or WSL2
 
 ```bash
 ./build/build.sh
 ```
 
-Optional Brave-aware overlay:
+To include the optional Brave integration:
 
 ```bash
 NMOS_ENABLE_BRAVE=1 ./build/build.sh
 ```
 
-## Testing
+Detailed instructions and supported overrides are in the [build guide](docs/build.md).
 
-The safest way to evaluate NM-OS is inside a virtual machine.
+## Test in a Virtual Machine
 
-1. Build the installer ISO from this repo.
-2. Boot the ISO in VirtualBox, QEMU, VMware, or another VM.
-3. Choose `Install NM-OS`.
-4. Finish the install flow.
-5. Reboot and test the setup assistant, apps, vault, and control center.
+1. Build the installer ISO.
+2. Boot it in QEMU, VirtualBox, VMware, or another virtual machine.
+3. Choose `Install NM-OS` and complete the installer.
+4. Reboot into the installed system.
+5. Exercise setup, profile switching, networking, the encrypted vault, updates, and recovery.
 
-Install details: [docs/installation.md](docs/installation.md)
+See the [installation guide](docs/installation.md) for the current workflow.
 
-## Useful Docs
+## Repository Layout
 
-- [User experience guide](docs/user-experience.md)
+- `apps/` — Python desktop applications and services
+- `build/` — build entry points and artifact verification
+- `config/system-overlay/` — installed-system files and policy
+- `config/installer/` — installer configuration and A/B scaffolding
+- `config/system-packages/` — runtime package manifests
+- `tests/` — Python, smoke, Windows, build, and QEMU validation
+- `docs/` — product, security, build, installation, and user documentation
+
+## Documentation
+
 - [Product direction](docs/vision.md)
-- [Implementation plan additions](docs/implementation-plan-additions.md)
 - [Security model](docs/security-model.md)
 - [Security profiles](docs/security-profiles.md)
+- [User experience](docs/user-experience.md)
+- [Installation](docs/installation.md)
+- [Build and release](docs/build.md)
+- [Update and rollback architecture](docs/update-rollback-architecture.md)
 - [Runtime notes](docs/runtime.md)
-- [Build notes](docs/build.md)
-- [Installation notes](docs/installation.md)
 - [Translation guide](docs/translations.md)
-- [Windows + WSL2 workflow](docs/windows-wsl.md)
 - [Independence program](docs/independence/README.md)
 
 ## Current Limits
 
-This is still alpha software. Not finished yet:
+NM-OS is not yet a release-ready daily-driver operating system. Important remaining work includes:
 
-- a release-grade update flow
-- full per-app permission editing
-- release-grade hardware validation
-- a fully independent base platform beyond the current Debian-backed layer
+- release-grade update publishing, signing-key operations, and recovery validation
+- complete per-application permission editing
+- broader automated privacy, networking, and failure-mode tests
+- hardware compatibility, suspend/resume, Wi-Fi, and installation testing
+- usability and accessibility testing with non-expert Linux users
+- reducing dependence on the current Debian-backed base platform
 
 ## License
 
-NM-OS is licensed under `GPL-3.0-or-later`.
-
-See [LICENSE](LICENSE) and [COPYING](COPYING).
+NM-OS is licensed under `GPL-3.0-or-later`. See [LICENSE](LICENSE) and [COPYING](COPYING).
