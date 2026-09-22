@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-set -euo pipefail
+set -eu
 
 TARGET_ROOT="${1:-/target}"
 VERSION="${NMOS_VERSION:-@VERSION@}"
@@ -23,20 +23,20 @@ log() {
 }
 
 render_fstab() {
-    local slot_name="$1"
-    local root_label="${SLOT_A_LABEL}"
-    local inactive_label="${SLOT_B_LABEL}"
-    local inactive_slot="b"
-    if [ "${slot_name}" = "b" ]; then
-        root_label="${SLOT_B_LABEL}"
-        inactive_label="${SLOT_A_LABEL}"
-        inactive_slot="a"
+    render_slot_name="$1"
+    render_root_label="${SLOT_A_LABEL}"
+    render_inactive_label="${SLOT_B_LABEL}"
+    render_inactive_slot="b"
+    if [ "${render_slot_name}" = "b" ]; then
+        render_root_label="${SLOT_B_LABEL}"
+        render_inactive_label="${SLOT_A_LABEL}"
+        render_inactive_slot="a"
     fi
     cat <<EOF
-LABEL=${root_label} / ext4 defaults 0 1
+LABEL=${render_root_label} / ext4 defaults 0 1
 LABEL=${STATE_LABEL} /var/lib/nmos ext4 defaults 0 2
 LABEL=${EFI_LABEL} /boot/efi vfat umask=0077 0 1
-LABEL=${inactive_label} /var/lib/nmos/slots/${inactive_slot} ext4 defaults,nofail 0 2
+LABEL=${render_inactive_label} /var/lib/nmos/slots/${render_inactive_slot} ext4 defaults,nofail 0 2
 EOF
 }
 

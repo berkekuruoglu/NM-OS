@@ -75,5 +75,5 @@ d-i preseed/late_command string \
     cp /cdrom/nmos/experimental-ab/prepare-target.sh /target/root/nmos-experimental-ab/prepare-target.sh; \
     cp /cdrom/nmos/@OVERLAY_ARCHIVE@ /target/root/@OVERLAY_ARCHIVE@; \
     cp /cdrom/nmos/@PACKAGES_FILE@ /target/root/@PACKAGES_FILE@; \
-    in-target /bin/bash /root/nmos-install-overlay.sh; \
-    /bin/bash /target/root/nmos-experimental-ab/prepare-target.sh /target /target/root/nmos-experimental-ab/profile.json
+    in-target /bin/sh /root/nmos-install-overlay.sh; \
+    /bin/sh /target/root/nmos-experimental-ab/prepare-target.sh /target /target/root/nmos-experimental-ab/profile.json

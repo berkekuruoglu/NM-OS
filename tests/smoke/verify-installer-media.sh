@@ -154,8 +154,23 @@ grep -q 'cdrom-detect/eject boolean true' "${PRESEED_TEMPLATE}" || {
     exit 1
 }
 
-grep -q 'in-target /bin/bash /root/nmos-install-overlay.sh' "${PRESEED_TEMPLATE}" || {
+grep -q 'in-target /bin/sh /root/nmos-install-overlay.sh' "${PRESEED_TEMPLATE}" || {
     echo "installer preseed template does not apply the NM-OS overlay in late_command." >&2
+    exit 1
+}
+
+if grep -q '/bin/bash' "${PRESEED_TEMPLATE}"; then
+    echo "installer preseed still depends on bash, which is unavailable in the d-i late-command environment." >&2
+    exit 1
+fi
+
+grep -q '^#!/bin/sh$' "${LATE_COMMAND_TEMPLATE}" || {
+    echo "installer overlay script is not compatible with the d-i POSIX shell." >&2
+    exit 1
+}
+
+grep -q '^#!/bin/sh$' "${AB_PREPARE_SCRIPT}" || {
+    echo "A/B target preparation is not compatible with the d-i POSIX shell." >&2
     exit 1
 }
 

@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-set -euo pipefail
+set -eu
 
 OVERLAY_ARCHIVE="/root/@OVERLAY_ARCHIVE@"
 PACKAGES_FILE="/root/@PACKAGES_FILE@"
