@@ -129,6 +129,11 @@ grep -q 'debconf-set partman-auto/disk' "${PRESEED_TEMPLATE}" || {
     exit 1
 }
 
+grep -q 'partman-basicfilesystems/no_mount_point boolean false' "${PRESEED_TEMPLATE}" || {
+    echo "installer preseed does not suppress the expected inactive-slot mount warning." >&2
+    exit 1
+}
+
 if grep -q '/dev/vda' "${PRESEED_TEMPLATE}"; then
     echo "installer preseed still hard-codes the QEMU-only /dev/vda target." >&2
     exit 1

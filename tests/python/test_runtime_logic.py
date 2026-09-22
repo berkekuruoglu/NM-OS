@@ -1626,6 +1626,7 @@ def test_installer_media_and_assets_are_packaged(repo_root: Path) -> None:
     assert "productName: \"NM-OS\"" in branding_source
     assert "@PKGSEL_INCLUDE@" in installer_preseed
     assert "in-target /bin/bash /root/nmos-install-overlay.sh" in installer_preseed
+    assert "partman-basicfilesystems/no_mount_point boolean false" in installer_preseed
     assert "Install NM-OS (erases the target disk)" in installer_grub_menu
     assert "set timeout=-1" in installer_grub_menu
     assert "auto=true priority=critical" in installer_grub_menu
